@@ -1,38 +1,53 @@
 import string
 import re
 
-def clean_text_data(raw_text):
+def process_and_clean_text(input_string):
     """
-    Standardizes a block of text for natural language processing.
-    """
-    # 1. Handle empty input
-    if not raw_text or not isinstance(raw_text, str):
-        return ""
-
-    # 2. Convert to lowercase for consistency
-    text = raw_text.lower()
-
-    # 3. Remove punctuation using a translation table
-    # string.punctuation contains characters like !"#$%&'()*+,-./:;<=>?@[\\]^_`{|}~
-    translator = str.maketrans('', '', string.punctuation)
-    text = text.translate(translator)
-
-    # 4. Remove digits using regular expressions
-    text = re.sub(r'\d+', '', text)
-
-    # 5. Remove extra whitespaces and newlines
-    # split() without arguments handles all types of whitespace
-    words = text.split()
+    A robust text-cleaning function designed for NLP preprocessing.
     
-    # 6. Join words back into a single string with one space between them
-    cleaned_text = " ".join(words)
+    Operations performed:
+    - Type checking and error handling.
+    - Lowercasing (Case normalization).
+    - Punctuation removal via translation tables.
+    - Numeric digit removal via Regular Expressions.
+    - Whitespace normalization (stripping and collapsing).
+    """
 
-    # 7. Basic validation: check if the result is still useful
-    if len(cleaned_text) < 1:
-        return "Warning: Text was cleared during cleaning."
+    # 1. VALIDATION: Ensure we are working with a string to avoid crashes.
+    # If the input is None or another type, we cast it or return empty.
+    if input_string is None:
+        return ""
+    
+    raw_data = str(input_string)
 
-    return cleaned_text
+    # 2. NORMALIZATION: Convert everything to lowercase.
+    # This ensures that 'Apple' and 'apple' are treated as the same word.
+    lowered_text = raw_data.lower()
 
-# Example Usage:
-messy_input = "  Hello! This is an EXAMPLE... It has 123 numbers and !!! punctuation.   "
-print(f"Cleaned: '{clean_text_data(messy_input)}'")
+    # 3. PUNCTUATION: Create a translation table to strip symbols.
+    # string.punctuation includes: !"#$%&'()*+,-./:;<=>?@[\\]^_`{|}~
+    # The third argument in maketrans specifies characters to be mapped to None.
+    punctuation_table = str.maketrans('', '', string.punctuation)
+    no_punc_text = lowered_text.translate(punctuation_table)
+
+    # 4. DIGITS: Use Regex to find and remove all numbers (0-9).
+    # '\d+' matches one or more consecutive digits.
+    # We replace them with an empty string.
+    no_numbers_text = re.sub(r'\d+', '', no_punc_text)
+
+    # 5. WHITESPACE: Clean up messy spacing and newlines.
+    # .split() splits by any whitespace (space, tab, newline).
+    # This effectively removes leading/trailing spaces and internal doubles.
+    words_list = no_numbers_text.split()
+
+    # 6. RECONSTRUCTION: Join the cleaned words back into a sentence.
+    # We use a single space as the delimiter.
+    final_cleaned_string = " ".join(words_list)
+
+    # 7. FINAL CHECK: Provide feedback if the text is now empty.
+    # This can happen if the input was only numbers and symbols.
+    if not final_cleaned_string.strip():
+        return "Process Warning: Resulting string is empty."
+
+    # Return the finalized, clean version of the text.
+    return final_cleaned_string
